@@ -5,7 +5,6 @@ function Guess({ guess, guessResult }) {
   return (
     <p className="guess">
       {range(5).map((num) => {
-        if (guessResult !== undefined) console.log(guessResult[num]);
         return (
           <span
             key={num}

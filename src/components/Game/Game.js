@@ -4,45 +4,52 @@ import { sample } from '../../utils';
 import { WORDS } from '../../data';
 import GameInput from '../GameInput';
 import GuessResult from '../GuessResult';
-
-// Pick a random word on every pageload.
-const answer = sample(WORDS);
-// To make debugging easier, we'll log the solution in the console.
-console.info({ answer });
+import GameWonBanner from '../GameWonBanner/GameWonBanner';
+import GameLostBanner from '../GameLostBanner/GameLostBanner';
+import { NUM_OF_GUESSES_ALLOWED } from '../../constants';
 
 function Game() {
   const [allGuesses, setAllGuesses] = React.useState([]);
+  const [answer, setAnswer] = React.useState(sample(WORDS));
   const [guessResult, setGuessResult] = React.useState([]);
   const [isGuessCorrect, setIsGuessCorrect] = React.useState(false);
 
-  console.log(guessResult);
+  function restartGame() {
+    setAnswer(sample(WORDS));
+    setAllGuesses([]);
+    setGuessResult([]);
+    setIsGuessCorrect(false);
+  }
+
+  console.info({ answer });
 
   return (
     <>
       <GuessResult guesses={allGuesses} guessResult={guessResult} />
-      {!isGuessCorrect ? (
-        allGuesses.length < 6 ? (
-          <GameInput
-            setAllGuesses={setAllGuesses}
-            setGuessResult={setGuessResult}
-            answer={answer}
-            setIsGuessCorrect={setIsGuessCorrect}
-          />
-        ) : (
-          <div class="sad banner">
-            <p>
-              You ran out of guesses! The correct answer is{' '}
-              <strong>{answer}</strong>.
-            </p>
-          </div>
-        )
-      ) : (
-        <div class="happy banner">
-          <p>
-            <strong>Congratulations!</strong> Got it in{' '}
-            <strong>3 guesses</strong>.
-          </p>
-        </div>
+
+      <GameInput
+        setAllGuesses={setAllGuesses}
+        setGuessResult={setGuessResult}
+        guessResult={guessResult}
+        answer={answer}
+        setIsGuessCorrect={setIsGuessCorrect}
+        disabled={
+          isGuessCorrect || allGuesses.length === NUM_OF_GUESSES_ALLOWED
+        }
+      />
+      {isGuessCorrect && (
+        <GameWonBanner
+          guessesLength={allGuesses.length}
+          restart={restartGame}
+          restartText="Click to Play again"
+        />
+      )}
+      {!isGuessCorrect && allGuesses.length === NUM_OF_GUESSES_ALLOWED && (
+        <GameLostBanner
+          answer={answer}
+          restart={restartGame}
+          restartText="Give it another shot!"
+        />
       )}
     </>
   );
